@@ -25,3 +25,9 @@ Mettre à jour la base de données :
 ```shell
 php bin/console doctrine:schema:update --force
 ```
+
+Démarrer le serveur :
+
+```shell
+symfony serve
+```
