@@ -2,9 +2,8 @@
 
 namespace App\Controller;
 
+use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -13,10 +12,13 @@ use Symfony\Component\Routing\Annotation\Route;
 class FileController extends AbstractController
 {
     /**
-     * @throws \Exception
+     * Cette méthode est associée à la route /file/{mode}. Elle permet de recevoir un fichier depuis un client pour lui
+     * renvoyer le fichier corrigé.
+     *
+     * @throws Exception
      */
     #[Route("/{mode}", name: "file_process", methods: "POST")]
-    public function addFile(Request $request, string $mode): JsonResponse
+    public function addFile(Request $request, string $mode): Response
     {
         $file = $request->files->get('file');
 
@@ -29,8 +31,15 @@ class FileController extends AbstractController
         } elseif ($mode === 'lower') {
             $content = strtolower($content);
         } else {
-            throw new \Exception('Mode de correction invalide');
+            throw new Exception('Mode de correction invalide');
         }
-        return new JsonResponse(['content' => $content]);
+
+        // Construire la réponse.
+        $response = new Response();
+        $response->setContent($content);
+        $response->headers->set('Content-Type', 'text/plain');
+        $response->headers->set('Content-Disposition', 'attachment; filename="' . $file->getClientOriginalName() . '"');
+
+        return $response;
     }
 }
